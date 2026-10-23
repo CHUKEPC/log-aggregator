@@ -245,9 +245,10 @@ class ElasticsearchLogStorage(LogStorage):
             # Parse histogram
             histogram: list[dict[str, Any]] = []
             for bucket in aggregations.get("time_histogram", {}).get("buckets", []):
+                ts_val = bucket.get("key_as_string") or str(bucket.get("key", ""))
                 histogram.append(
                     {
-                        "timestamp": bucket.get("key_as_string", str(bucket["key"])),
+                        "timestamp": ts_val,
                         "count": int(bucket["doc_count"]),
                     }
                 )

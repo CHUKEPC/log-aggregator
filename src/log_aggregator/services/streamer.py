@@ -7,7 +7,8 @@ incoming logs in real time (similar to tail -f).
 import asyncio
 import json
 import logging
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 from typing import Any
 
 from starlette.websockets import WebSocket
@@ -22,9 +23,18 @@ class StreamSubscriber:
     """Subscription state and filter preferences for an active WebSocket client."""
 
     websocket: WebSocket
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
     service: str | None = None
     min_level: LogLevel | None = None
     query: str | None = None
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, StreamSubscriber):
+            return self.id == other.id
+        return False
 
 
 class LogStreamer:
